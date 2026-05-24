@@ -19,8 +19,8 @@
   --border:       rgba(255,220,170,0.07);
   --border-hi:    rgba(255,220,170,0.14);
   /* Text */
-  --text:         #f0e8dc;
-  --text-muted:   #9e8c78;
+  --text:         #fffefd;
+  --text-muted:   #b0a79c;
   --text-faint:   #5a4e42;
   /* Accent — warm amber-brown */
   --accent:       #c8813a;

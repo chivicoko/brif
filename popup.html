@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>brif - Page Summarizer</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <div class="app" id="app" data-theme="dark">
+
+    <!-- ── Header ── -->
+    <header class="header">
+      <div class="header-left">
+        <div class="logo" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <path d="M12 2L2 7l10 5 10-5-10-5z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+            <path d="M2 17l10 5 10-5" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+            <path d="M2 12l10 5 10-5" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <span class="app-title">brif</span>
+        <!-- <span class="provider-chip" id="providerChip">Gemini AI</span> -->
+      </div>
+      <div class="header-right">
+        <button class="icon-btn" id="settingsBtn" title="Settings" aria-label="Open settings">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" stroke="currentColor" stroke-width="1.8"/>
+          </svg>
+        </button>
+        <button class="icon-btn theme-toggle" id="themeToggle" title="Toggle theme" aria-label="Toggle dark/light mode">
+          <svg class="sun-icon" width="16" height="16" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="1.8"/>
+            <line x1="12" y1="1" x2="12" y2="3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            <line x1="12" y1="21" x2="12" y2="23" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            <line x1="1" y1="12" x2="3" y2="12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            <line x1="21" y1="12" x2="23" y2="12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+          <svg class="moon-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" style="display:none">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- ── Settings Panel ── -->
+    <div class="settings-panel" id="settingsPanel" aria-hidden="true" role="region" aria-label="Settings">
+      <div class="settings-inner">
+        <h3 class="settings-title">Settings</h3>
+
+        <!-- Summary mode -->
+        <div class="form-group">
+          <label for="summaryMode" class="form-label">Summary Style</label>
+          <select id="summaryMode" class="form-select" aria-label="Summary style">
+            <option value="detailed">Detailed — comprehensive (5-7 points)</option>
+            <option value="brief">Brief — 3 bullet points</option>
+            <option value="academic">Academic — analytical language</option>
+            <option value="tldr">TL;DR — one-liner + 3 bullets</option>
+          </select>
+        </div>
+
+        <button class="save-settings-btn" id="saveSettings">Save Settings</button>
+        <p class="save-status" id="saveStatus" aria-live="polite" aria-atomic="true"></p>
+      </div>
+    </div>
+
+    <!-- ── Main View ── -->
+    <main class="main" id="mainView">
+
+      <!-- Page Info card -->
+      <div class="page-info" id="pageInfo" role="region" aria-label="Current page">
+        <div class="page-favicon" id="pageFavicon" aria-hidden="true"></div>
+        <div class="page-meta">
+          <p class="page-title" id="pageTitle">Loading page info…</p>
+          <p class="page-url" id="pageUrl"></p>
+        </div>
+      </div>
+
+      <!-- Cached result notice -->
+      <div class="cached-badge" id="cachedBadge" style="display:none" aria-live="polite">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <polyline points="23 4 23 10 17 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Cached result
+        <button class="refresh-cache" id="refreshCache" aria-label="Re-summarize this page">↺ Refresh</button>
+      </div>
+
+      <!-- Action bar -->
+      <div class="actions" id="actionBar">
+        <button class="summarize-btn" id="summarizeBtn" aria-label="Summarize this page">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M12 2L2 7l10 5 10-5-10-5z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+            <path d="M2 17l10 5 10-5" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+            <path d="M2 12l10 5 10-5" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+          </svg>
+          Summarize Page
+        </button>
+        <button class="highlight-btn" id="highlightBtn" aria-label="Highlight key sentences on the page" style="display:none">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M12 20h9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Highlight
+        </button>
+      </div>
+
+      <!-- Loading state -->
+      <div class="loading-state" id="loadingState" style="display:none" role="status" aria-live="polite" aria-label="Generating summary">
+        <div class="spinner" aria-hidden="true"><div class="spinner-ring"></div></div>
+        <p class="loading-text" id="loadingText">Extracting page content…</p>
+        <div class="loading-steps" aria-hidden="true">
+          <div class="step" id="step1"><div class="step-dot"></div><span>Extract</span></div>
+          <div class="step-line"></div>
+          <div class="step" id="step2"><div class="step-dot"></div><span>Send to AI</span></div>
+          <div class="step-line"></div>
+          <div class="step" id="step3"><div class="step-dot"></div><span>Build summary</span></div>
+        </div>
+      </div>
+
+      <!-- Error state -->
+      <div class="error-state" id="errorState" style="display:none" role="alert">
+        <div class="error-icon" aria-hidden="true">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.8"/>
+            <line x1="12" y1="8" x2="12" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <line x1="12" y1="16" x2="12.01" y2="16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <p class="error-message" id="errorMessage">Something went wrong.</p>
+        <button class="retry-btn" id="retryBtn">Try Again</button>
+      </div>
+
+      <!-- Results -->
+      <div class="results" id="results" style="display:none">
+
+        <!-- Stats bar -->
+        <div class="stats-bar">
+          <div class="stat">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+              <path d="M12 6v6l4 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            <span id="readingTime">— min read</span>
+          </div>
+          <div class="stat">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="currentColor" stroke-width="2"/>
+              <polyline points="14 2 14 8 20 8" stroke="currentColor" stroke-width="2"/>
+            </svg>
+            <span id="wordCount">— words</span>
+          </div>
+          <div class="stat" id="modeTagStat">
+            <span class="mode-tag" id="modeTag"></span>
+          </div>
+          <button class="copy-btn" id="copyBtn" title="Copy summary to clipboard" aria-label="Copy summary to clipboard">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <rect x="9" y="9" width="13" height="13" rx="2" stroke="currentColor" stroke-width="1.8"/>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" stroke="currentColor" stroke-width="1.8"/>
+            </svg>
+            Copy
+          </button>
+        </div>
+
+        <!-- Scrollable content -->
+        <div class="summary-scroll" id="summaryScroll" tabindex="0" role="region" aria-label="Summary content">
+
+          <!-- TL;DR -->
+          <section class="summary-section">
+            <h3 class="section-label">
+              <span class="label-dot" aria-hidden="true"></span>TL;DR
+            </h3>
+            <p class="tldr-text" id="tldrText"></p>
+          </section>
+
+          <!-- Key Points -->
+          <section class="summary-section">
+            <h3 class="section-label">
+              <span class="label-dot" aria-hidden="true"></span>Key Points
+            </h3>
+            <ul class="bullet-list" id="bulletList" aria-label="Key points"></ul>
+          </section>
+
+          <!-- Key Insights -->
+          <section class="summary-section">
+            <h3 class="section-label">
+              <span class="label-dot" aria-hidden="true"></span>Key Insights
+            </h3>
+            <ul class="insights-list" id="insightsList" aria-label="Key insights"></ul>
+          </section>
+
+          <!-- ── Email Section ── -->
+          <section class="summary-section email-section" id="emailSection">
+            <h3 class="section-label">
+              <span class="label-dot" aria-hidden="true"></span>Send to Email
+            </h3>
+            <div class="email-row">
+              <input
+                type="email"
+                id="emailInput"
+                class="form-input email-input"
+                placeholder="you@example.com"
+                autocomplete="email"
+                aria-label="Email address to send summary to"
+              />
+              <button class="send-email-btn" id="sendEmailBtn" aria-label="Send summary to email">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <line x1="22" y1="2" x2="11" y2="13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <polygon points="22 2 15 22 11 13 2 9 22 2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+            </div>
+            <p class="email-status" id="emailStatus" aria-live="polite"></p>
+          </section>
+
+        </div>
+
+        <!-- Footer actions -->
+        <div class="results-footer">
+          <button class="clear-btn" id="clearBtn" aria-label="Clear summary and reset">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <polyline points="3 6 5 6 21 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" stroke="currentColor" stroke-width="2"/>
+              <path d="M10 11v6M14 11v6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            Clear
+          </button>
+          <span class="provider-footer-tag" id="providerFooterTag">via Gemini 2.5 Flash</span>
+        </div>
+
+      </div>
+
+    </main>
+
+    <!-- ── No API Key Prompt ── -->
+    <div class="no-key-prompt" id="noKeyPrompt" style="display:none" role="complementary" aria-label="Setup required">
+      <div class="no-key-icon" aria-hidden="true">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+          <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <h3>API Key Not Configured</h3>
+      <p>The Gemini API key is missing. Ask the developer to run <code>node scripts/build-config.js</code> after filling in <code>.env</code>.</p>
+      <a class="get-key-link" href="https://aistudio.google.com/app/apikey" target="_blank">
+        Get a free Gemini key →
+      </a>
+    </div>
+
+  </div><!-- /.app -->
+
+  <!-- Config (generated from .env — never committed) -->
+  <script src="config.js"></script>
+  <!-- EmailJS SDK (local copy — no CDN dependency) -->
+  <script src="vendor/emailjs.min.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>
